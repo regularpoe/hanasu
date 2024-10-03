@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>hanasu</title>
+  <meta name="description" content="">
+  <meta name="author" content="regularpoe">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="//fonts.googleapis.com/css?family=Raleway:400,300,600" rel="stylesheet" type="text/css">
+  <link rel="stylesheet" href="normalize.css">
+  <link rel="stylesheet" href="skeleton.css">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <div class="row tc">
+            <button id="recordButton">Record</button>
+            <audio id="audioPlayback" controls style="display: none;"></audio>
+        </div>
+    </div>
+    <script>
+        const recordButton = document.getElementById('recordButton');
+        const audioPlayback = document.getElementById('audioPlayback');
+        let mediaRecorder;
+        let audioChunks = [];
+        let isRecording = false;
+
+        recordButton.addEventListener('click', async () => {
+            if (!isRecording) {
+                isRecording = true;
+                recordButton.textContent = 'Stop';
+
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+
+                mediaRecorder = new MediaRecorder(stream);
+                mediaRecorder.start();
+
+                mediaRecorder.ondataavailable = (event) => {
+                    audioChunks.push(event.data);
+                };
+
+                mediaRecorder.onstop = () => {
+                    const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
+                    const audioUrl = URL.createObjectURL(audioBlob);
+                    audioPlayback.src = audioUrl;
+                    audioPlayback.style.display = 'block';
+
+                    const a = document.createElement('a');
+                    a.href = audioUrl;
+                    a.download = 'recorded-audio.wav';
+                    a.click();
+
+                    audioChunks = [];
+                };
+            } else {
+                isRecording = false;
+                recordButton.textContent = 'Record';
+                mediaRecorder.stop();
+            }
+        });
+    </script>
+</body>
+</html>
