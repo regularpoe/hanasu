@@ -25,6 +25,16 @@
         let audioChunks = [];
         let isRecording = false;
 
+        function getTimestamp() {
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = String(now.getMonth() + 1).padStart(2, '0'); // Months are zero-based
+            const day = String(now.getDate()).padStart(2, '0');
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            return `${year}:${month}:${day}:${hours}:${minutes}`;
+        }
+
         recordButton.addEventListener('click', async () => {
             if (!isRecording) {
                 isRecording = true;
@@ -45,9 +55,12 @@
                     audioPlayback.src = audioUrl;
                     audioPlayback.style.display = 'block';
 
+                    const timestamp = getTimestamp();
+                    const filename = `recording-${timestamp}.wav`;
+
                     const a = document.createElement('a');
                     a.href = audioUrl;
-                    a.download = 'recorded-audio.wav';
+                    a.download = filename;
                     a.click();
 
                     audioChunks = [];
